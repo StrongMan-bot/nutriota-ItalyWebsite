@@ -10,7 +10,7 @@ const Products = () => {
   const { t, i18n } = useTranslation('products');
   const router = useRouter();
   const { search, category } = router.query;
-  const [selectedCategory, setSelectedCategory] = useState(t('allProducts'));
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
 
   // List of best seller product names
@@ -117,6 +117,14 @@ const Products = () => {
 
   const categories = [t('allProducts'), t('minerals'), t('vitamins'), t('supplements'), t('herbalSupplements')];
 
+  // Initialize selectedCategory when component mounts or language changes
+  useEffect(() => {
+    if (!selectedCategory) {
+      // If no category is selected, default to "All Products"
+      setSelectedCategory(t('allProducts'));
+    }
+  }, [t, selectedCategory]);
+
   // Handle category filtering from URL params
   useEffect(() => {
     if (category) {
@@ -133,8 +141,35 @@ const Products = () => {
       if (translatedCategory) {
         setSelectedCategory(translatedCategory);
       }
+    } else {
+      // If no category in URL, set to "All Products"
+      setSelectedCategory(t('allProducts'));
     }
   }, [category, t]);
+
+  // Handle language changes - update selectedCategory to use new language translations
+  useEffect(() => {
+    if (selectedCategory) {
+      // Map current selectedCategory to the new language
+      const categoryMap: { [key: string]: string } = {
+        'All Products': t('allProducts'),
+        'Tutti i prodotti': t('allProducts'),
+        'Minerals': t('minerals'),
+        'Minerali': t('minerals'),
+        'Vitamins': t('vitamins'),
+        'Vitamine': t('vitamins'),
+        'Supplements': t('supplements'),
+        'Integratori alimentari': t('supplements'),
+        'Herbal Supplements': t('herbalSupplements'),
+        'Integratori erboristici': t('herbalSupplements')
+      };
+      
+      // If current selectedCategory is in the map, update it to the new language
+      if (categoryMap[selectedCategory]) {
+        setSelectedCategory(categoryMap[selectedCategory]);
+      }
+    }
+  }, [i18n.language, t]);
 
   // Filter products based on selected category
   useEffect(() => {
